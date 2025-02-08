@@ -1,14 +1,13 @@
 from flask import Flask
 from flask_socketio import SocketIO
+from config import Config
+from events.events_registry import register_events
 import pyautogui
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-@socketio.on("move_mouse_center")
-def move_mouse_center():
-    screen_width, screen_height = pyautogui.size()
-    pyautogui.moveTo(screen_width / 2, screen_height / 2)
+register_events(socketio)
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+    socketio.run(app, host=Config.SOCKET_HOST, port=Config.SOCKET_PORT, debug=Config.APP_DEBUG)
