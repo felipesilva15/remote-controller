@@ -2,6 +2,8 @@ import React from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
 import { useSocket } from "../hooks/useSocket";
 import { Direction } from "../enums/directions";
+import Touchpad from "../components/Touchpad";
+import { ScrollView } from "react-native-gesture-handler";
 
 export default function Home() {
     const { isConnected, moveMouse } = useSocket();
@@ -12,6 +14,7 @@ export default function Home() {
                 Status: {isConnected ? "Conectado" : "Desconectado"}
             </Text>
             <Button title="Mover mouse para o centro" onPress={() => moveMouse(Direction.CENTER)} />
+            <Touchpad />
         </View>
     );
 }
