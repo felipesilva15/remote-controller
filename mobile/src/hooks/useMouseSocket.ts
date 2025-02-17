@@ -24,6 +24,10 @@ export function useMouseSocket() {
     emitEvent("get_mouse_position");
   }
 
+  const moveMouseToRelativePosition = (mousePosition: MousePosition) => {
+    emitEvent("move_mouse_to_relative_position", mousePosition);
+  }
+
   const clickMouse = () => {
     emitEvent("click_mouse");
   }
@@ -38,5 +42,5 @@ export function useMouseSocket() {
     };
   }, []);
 
-  return { mousePosition, moveMouse, moveMouseTo, getMousePosition, clickMouse };
+  return { mousePosition, moveMouse, moveMouseTo, getMousePosition, clickMouse, moveMouseToRelativePosition };
 }

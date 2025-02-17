@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
 import { PanGestureHandler, TapGestureHandler, State, GestureEvent, PanGestureChangeEventPayload, PanGestureHandlerEventPayload } from "react-native-gesture-handler";
 import { useSocket } from "../hooks/useSocket";
@@ -8,41 +8,45 @@ import { MousePosition } from "../models/mousePosition";
 const { width } = Dimensions.get("window");
 const TOUCHPAD_WIDTH = width * 0.9;
 const TOUCHPAD_HEIGHT = 200;
-const MOVEMENT_MOUSE_DELAY = 80;
+const MOVEMENT_MOUSE_DELAY = 60;
 const MOUSE_SENSIBILITY = 1.5;
 
 export default function Touchpad () {
-  const { mousePosition, getMousePosition, moveMouseTo, clickMouse } = useMouseSocket()
-  const { isConnected } = useSocket();
+  const { moveMouseToRelativePosition, clickMouse } = useMouseSocket();
   const [ lastMovementTimestamp, setLastMovementTimestamp ] = useState(0);
+  const [ lastMousePosition, setLastMousePosition ] = useState<MousePosition | null>(null);
+  const lastMousePositionRef = useRef<MousePosition | null>(null);
 
   const handleGesture = (event: GestureEvent<PanGestureHandlerEventPayload>) => {
     const { translationX, translationY } = event.nativeEvent;
 
-    if (event.nativeEvent.state == State.END) {
-      console.log("terminou");
-    }
-
-    if(translationX == 0 && translationY == 0) {
-      getMousePosition();
+    if (translationX == 0 && translationY == 0) {
       setLastMovementTimestamp(Date.now());
+      lastMousePositionRef.current = { x: 0, y: 0, timestamp: undefined };
+      setLastMousePosition(lastMousePositionRef.current);
     }
 
-    if (mousePosition && (Date.now() - lastMovementTimestamp) > MOVEMENT_MOUSE_DELAY) {
+    if ((Date.now() - lastMovementTimestamp) > MOVEMENT_MOUSE_DELAY) {
+      const lastX = lastMousePositionRef.current?.x ?? 0;
+      const lastY = lastMousePositionRef.current?.y ?? 0;
+
       const direction: MousePosition = {
-        x: mousePosition.x + (translationX * MOUSE_SENSIBILITY),
-        y: mousePosition.y + (translationY * MOUSE_SENSIBILITY),
+        x: (translationX - lastX) * MOUSE_SENSIBILITY,
+        y: (translationY - lastY) * MOUSE_SENSIBILITY,
         timestamp: Date.now()
       };
 
-      moveMouseTo(direction);
+      moveMouseToRelativePosition(direction);
+
       setLastMovementTimestamp(Date.now());
+      lastMousePositionRef.current = { x: translationX, y: translationY, timestamp: undefined };
+      setLastMousePosition(lastMousePositionRef.current);
     }
   };
 
   const handleTap = (event: any) => {
     if (event.nativeEvent.state === State.ACTIVE) {
-      clickMouse()
+      clickMouse();
     }
   };
 
