@@ -33,5 +33,3 @@ class MouseService:
         actualPositionX, actualPositionY = pyautogui.position()
 
         pyautogui.moveTo(actualPositionX + position.x, actualPositionY + position.y)
-
-    
