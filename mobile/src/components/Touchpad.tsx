@@ -1,26 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
-import { PanGestureHandler, GestureHandlerRootView, GestureDetector, Gesture, TapGestureHandler, State } from "react-native-gesture-handler";
+import { PanGestureHandler, TapGestureHandler, State, GestureEvent, PanGestureChangeEventPayload, PanGestureHandlerEventPayload } from "react-native-gesture-handler";
 import { useSocket } from "../hooks/useSocket";
+import { useMouseSocket } from "../hooks/useMouseSocket";
+import { MousePosition } from "../models/mousePosition";
 
 const { width } = Dimensions.get("window");
 const TOUCHPAD_WIDTH = width * 0.9;
 const TOUCHPAD_HEIGHT = 200;
+const MOVEMENT_MOUSE_DELAY = 80;
+const MOUSE_SENSIBILITY = 1.5;
 
 export default function Touchpad () {
-  const {isConnected, mousePosition, getMousePosition} = useSocket()
+  const { mousePosition, getMousePosition, moveMouseTo, clickMouse } = useMouseSocket()
+  const { isConnected } = useSocket();
+  const [ lastMovementTimestamp, setLastMovementTimestamp ] = useState(0);
 
-  const handleGesture = (event: any) => {
+  const handleGesture = (event: GestureEvent<PanGestureHandlerEventPayload>) => {
     const { translationX, translationY } = event.nativeEvent;
 
+    if (event.nativeEvent.state == State.END) {
+      console.log("terminou");
+    }
+
     if(translationX == 0 && translationY == 0) {
-      getMousePosition()
+      getMousePosition();
+      setLastMovementTimestamp(Date.now());
+    }
+
+    if (mousePosition && (Date.now() - lastMovementTimestamp) > MOVEMENT_MOUSE_DELAY) {
+      const direction: MousePosition = {
+        x: mousePosition.x + (translationX * MOUSE_SENSIBILITY),
+        y: mousePosition.y + (translationY * MOUSE_SENSIBILITY),
+        timestamp: Date.now()
+      };
+
+      moveMouseTo(direction);
+      setLastMovementTimestamp(Date.now());
     }
   };
 
   const handleTap = (event: any) => {
     if (event.nativeEvent.state === State.ACTIVE) {
-      console.log("Clicked!");
+      clickMouse()
     }
   };
 
