@@ -29,7 +29,7 @@ class MouseService:
     def move_to(position: MousePosition):
         pyautogui.moveTo(position.x, position.y)
 
-    def move_relative_position(position: MousePosition):
+    def move_to_relative_position(position: MousePosition):
         actualPositionX, actualPositionY = pyautogui.position()
 
         pyautogui.moveTo(actualPositionX + position.x, actualPositionY + position.y)

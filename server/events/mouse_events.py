@@ -26,11 +26,11 @@ def register_mouse_events(socketio: SocketIO):
 
         MouseService.move_to(position)
 
-    @socketio.on("move_mouse_relative")
+    @socketio.on("move_mouse_to_relative_position")
     def move_mouse_to(data: MousePosition):
         position = MousePosition(**data)
 
-        MouseService.move_relative_position(position)
+        MouseService.move_to_relative_position(position)
 
     @socketio.on("get_mouse_position")
     def get_mouse_position():
