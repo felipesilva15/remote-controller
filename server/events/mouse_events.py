@@ -1,5 +1,6 @@
 from flask_socketio import SocketIO
 from models.mouse_event import MouseEvent
+from models.mouse_position import MousePosition
 from services.mouse_service import MouseService
 from enums.Direction import Direction
 from flask_socketio import send, emit
@@ -18,6 +19,18 @@ def register_mouse_events(socketio: SocketIO):
 
             case _:
                 print(f"Invalid direction: {event.direction}")
+
+    @socketio.on("move_mouse_to")
+    def move_mouse_to(data: MousePosition):
+        position = MousePosition(**data)
+
+        MouseService.move_to(position)
+
+    @socketio.on("move_mouse_relative_position")
+    def move_mouse_to(data: MousePosition):
+        position = MousePosition(**data)
+
+        MouseService.move_relative_position(position)
 
     @socketio.on("get_mouse_position")
     def get_mouse_position():
